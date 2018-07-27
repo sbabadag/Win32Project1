@@ -223,13 +223,14 @@
 #include <ShapeAnalysis_Surface.hxx>
 #include <BRepClass_FaceClassifier.hxx>
 #include <V3d_Coordinate.hxx>
+#include <BRepOffsetAPI_MakePipeShell.hxx>
 
 
 Handle(Aspect_DisplayConnection) aDisplayConnection;
 Handle(OpenGl_GraphicDriver)     myGraphicDriver;
 Handle_V3d_Viewer                mViewer;
 Handle_V3d_View                  mView;
-Handle_AIS_InteractiveContext     mContext;
+Handle_AIS_InteractiveContext    mContext;
 Standard_Integer  myXmin;
 Standard_Integer  myYmin;
 Standard_Integer  myXmax;
@@ -372,6 +373,9 @@ TopoDS_Shape Make_IPE_Profile(double h, double b, double tf, double tw, gp_Pnt s
 
 	//
 	BRepBuilderAPI_MakeWire mkWire;
+	BRepBuilderAPI_MakeWire mkWire1;
+	mkWire1.Add(threadingWire13);
+
 	mkWire.Add(threadingWire1);
 	mkWire.Add(threadingWire2);
 	mkWire.Add(threadingWire3);
@@ -390,10 +394,14 @@ TopoDS_Shape Make_IPE_Profile(double h, double b, double tf, double tw, gp_Pnt s
 	double Length = sPt.Distance(ePt);
 	gp_Vec aPrismVec(gp_Pnt(0, 0, 0), gp_Pnt(0, 0, Length));
 	TopoDS_Shape IPE_Profile = BRepPrimAPI_MakePrism(myFaceProfile, aPrismVec);
-	//TopoDS_Shape Pipe = BRepOffsetAPI_MakePipe(threadingWire13, myFaceProfile);
 	gp_Trsf Tr;
-	gp_Ax3 oldAxis(gp_Pnt(0, 0, 0), gp_Dir(0, 0, 1));
+	gp_Ax3 oldAxis(gp_Pnt(0, 0, 0), gp_Dir(0, 0, Length));
 	gp_Ax3 newAxis(sPt, gp_Dir(ePt.X(), ePt.Y(), ePt.Z()));
+	
+	
+
+
+
 
 	Tr.SetDisplacement(oldAxis, newAxis);
 
@@ -402,3 +410,159 @@ TopoDS_Shape Make_IPE_Profile(double h, double b, double tf, double tw, gp_Pnt s
 
 	return xform1.Shape();
 }
+
+TopoDS_Shape MyExtrudeProfile(double h, double b, double tf, double tw, gp_Pnt sPt, gp_Pnt ePt)
+{
+	//
+
+	gp_Pnt pt0(-b / 2, -h / 2, 0);
+	gp_Pnt pt1(b / 2, -h / 2, 0);
+	gp_Pnt pt2(b / 2, -h / 2 + tf, 0);
+	gp_Pnt pt3(tw / 2, -h / 2 + tf, 0);
+	gp_Pnt pt4(tw / 2, h / 2 - tf, 0);
+	gp_Pnt pt5(b / 2, h / 2 - tf, 0);
+	gp_Pnt pt6(b / 2, h / 2, 0);
+	gp_Pnt pt7(-b / 2, h / 2, 0);
+	gp_Pnt pt8(-b / 2, h / 2 - tf, 0);
+	gp_Pnt pt9(-tw / 2, h / 2 - tf, 0);
+	gp_Pnt pt10(-tw / 2, -h / 2 + tf, 0);
+	gp_Pnt pt11(-b / 2, -h / 2 + tf, 0);
+	//
+	gp_Pnt pt12(0, 0, 0);
+	gp_Pnt pt13(100, 100, 100);
+
+
+
+	Handle(Geom_TrimmedCurve) aSegment1 = GC_MakeSegment(pt0, pt1);
+	Handle(Geom_TrimmedCurve) aSegment2 = GC_MakeSegment(pt1, pt2);
+	Handle(Geom_TrimmedCurve) aSegment3 = GC_MakeSegment(pt2, pt3);
+	Handle(Geom_TrimmedCurve) aSegment4 = GC_MakeSegment(pt3, pt4);
+	Handle(Geom_TrimmedCurve) aSegment5 = GC_MakeSegment(pt4, pt5);
+	Handle(Geom_TrimmedCurve) aSegment6 = GC_MakeSegment(pt5, pt6);
+	Handle(Geom_TrimmedCurve) aSegment7 = GC_MakeSegment(pt6, pt7);
+	Handle(Geom_TrimmedCurve) aSegment8 = GC_MakeSegment(pt7, pt8);
+	Handle(Geom_TrimmedCurve) aSegment9 = GC_MakeSegment(pt8, pt9);
+	Handle(Geom_TrimmedCurve) aSegment10 = GC_MakeSegment(pt9, pt10);
+	Handle(Geom_TrimmedCurve) aSegment11 = GC_MakeSegment(pt10, pt11);
+	Handle(Geom_TrimmedCurve) aSegment12 = GC_MakeSegment(pt11, pt0);
+	//
+	Handle(Geom_TrimmedCurve) aSegment13 = GC_MakeSegment(pt12, pt13);
+
+	TopoDS_Edge anEdge1 = BRepBuilderAPI_MakeEdge(aSegment1);
+	TopoDS_Edge anEdge2 = BRepBuilderAPI_MakeEdge(aSegment2);
+	TopoDS_Edge anEdge3 = BRepBuilderAPI_MakeEdge(aSegment3);
+	TopoDS_Edge anEdge4 = BRepBuilderAPI_MakeEdge(aSegment4);
+	TopoDS_Edge anEdge5 = BRepBuilderAPI_MakeEdge(aSegment5);
+	TopoDS_Edge anEdge6 = BRepBuilderAPI_MakeEdge(aSegment6);
+	TopoDS_Edge anEdge7 = BRepBuilderAPI_MakeEdge(aSegment7);
+	TopoDS_Edge anEdge8 = BRepBuilderAPI_MakeEdge(aSegment8);
+	TopoDS_Edge anEdge9 = BRepBuilderAPI_MakeEdge(aSegment9);
+	TopoDS_Edge anEdge10 = BRepBuilderAPI_MakeEdge(aSegment10);
+	TopoDS_Edge anEdge11 = BRepBuilderAPI_MakeEdge(aSegment11);
+	TopoDS_Edge anEdge12 = BRepBuilderAPI_MakeEdge(aSegment12);
+	//
+	TopoDS_Edge anEdge13 = BRepBuilderAPI_MakeEdge(aSegment13);
+
+	//
+	TopoDS_Wire threadingWire1 = BRepBuilderAPI_MakeWire(anEdge1, anEdge2);
+	TopoDS_Wire threadingWire2 = BRepBuilderAPI_MakeWire(anEdge2, anEdge3);
+	TopoDS_Wire threadingWire3 = BRepBuilderAPI_MakeWire(anEdge3, anEdge4);
+	TopoDS_Wire threadingWire4 = BRepBuilderAPI_MakeWire(anEdge4, anEdge5);
+	TopoDS_Wire threadingWire5 = BRepBuilderAPI_MakeWire(anEdge5, anEdge6);
+	TopoDS_Wire threadingWire6 = BRepBuilderAPI_MakeWire(anEdge6, anEdge7);
+	TopoDS_Wire threadingWire7 = BRepBuilderAPI_MakeWire(anEdge7, anEdge8);
+	TopoDS_Wire threadingWire8 = BRepBuilderAPI_MakeWire(anEdge8, anEdge9);
+	TopoDS_Wire threadingWire9 = BRepBuilderAPI_MakeWire(anEdge9, anEdge10);
+	TopoDS_Wire threadingWire10 = BRepBuilderAPI_MakeWire(anEdge10, anEdge11);
+	TopoDS_Wire threadingWire11 = BRepBuilderAPI_MakeWire(anEdge11, anEdge12);
+	TopoDS_Wire threadingWire12 = BRepBuilderAPI_MakeWire(anEdge12, anEdge1);
+	//
+	TopoDS_Wire threadingWire13 = BRepBuilderAPI_MakeWire(anEdge13);
+
+	//
+	BRepBuilderAPI_MakeWire mkWire;
+	BRepBuilderAPI_MakeWire mkWire1;
+	mkWire1.Add(threadingWire13);
+
+	mkWire.Add(threadingWire1);
+	mkWire.Add(threadingWire2);
+	mkWire.Add(threadingWire3);
+	mkWire.Add(threadingWire4);
+	mkWire.Add(threadingWire5);
+	mkWire.Add(threadingWire6);
+	mkWire.Add(threadingWire7);
+	mkWire.Add(threadingWire8);
+	mkWire.Add(threadingWire9);
+	mkWire.Add(threadingWire10);
+	mkWire.Add(threadingWire11);
+	mkWire.Add(threadingWire12);
+	//
+	TopoDS_Wire myWireProfile = mkWire.Wire();
+
+	//
+	Handle(Geom_TrimmedCurve) aSegment111 = GC_MakeSegment(sPt, ePt);
+	//
+	TopoDS_Edge anEdge111 = BRepBuilderAPI_MakeEdge(aSegment111);
+    //
+	TopoDS_Wire threadingWire111 = BRepBuilderAPI_MakeWire(anEdge111);
+	//
+	BRepBuilderAPI_MakeWire mkPathWire;
+   //
+	mkPathWire.Add(threadingWire111);
+	//
+	TopoDS_Wire myPathWire = mkPathWire.Wire();
+	//
+	auto S = BRepOffsetAPI_MakePipeShell(myPathWire);
+	S.Add(myWireProfile);
+	 S.Build();
+	 return S.Shape();
+}
+
+TopoDS_Shape extrudePolygon(double ex, double ey, double ez, std::vector<double> const &points) {
+
+	if (points.size() % 3 != 0) {
+		std::cerr << "ERROR: wrong number count, must be multiples of 3, but is " << points.size() << std::endl;
+		exit(1);
+	}
+
+	size_t numVerts = points.size() / 3;
+	std::vector<TopoDS_Vertex> vertices(numVerts);
+
+	for (size_t i = 0; i < points.size(); i += 3) {
+
+		gp_XYZ p;
+		p.SetCoord(points[i + 0], points[i + 1], points[i + 2]);
+		vertices[i / 3] = BRepBuilderAPI_MakeVertex(p);
+	}
+
+	BRepBuilderAPI_MakePolygon polyMaker;
+
+	for (size_t i = 0; i < numVerts; i++) {
+		polyMaker.Add(vertices[i]);
+	}
+
+	polyMaker.Close();
+
+	if (!polyMaker.IsDone()) {
+		std::cerr << "ERROR: cannot construct polygon for extrusion. Path invalid (e.g., crossing edges)" << std::endl;
+		exit(1);
+	}
+
+	TopoDS_Wire wire = polyMaker.Wire();
+
+	if (wire.IsNull()) {
+		std::cerr << "ERROR: cannot construct polygon for extrusion. Path invalid (e.g., crossing edges)" << std::endl;
+		exit(1);
+	}
+
+	TopoDS_Face face = BRepBuilderAPI_MakeFace(wire);
+
+	gp_Vec direction;
+
+	direction.SetX(ex);
+	direction.SetY(ey);
+	direction.SetZ(ez);
+
+	return BRepPrimAPI_MakePrism(face, direction);
+}
+

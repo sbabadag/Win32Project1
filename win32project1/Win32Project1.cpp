@@ -32,6 +32,7 @@ HWND ZoomButton;
 HWND ZoomAllButton;
 
 TopoDS_Shape IPE400;
+TopoDS_Shape IPE100;
 
 
 
@@ -144,7 +145,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    mViewer = new V3d_Viewer(myGraphicDriver);
    mViewer->SetDefaultLights();
    mViewer->SetLightOn();
-
+   
 
    mView = mViewer->CreateView();
    mView->SetWindow(wind);
@@ -164,17 +165,37 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    mContext = new AIS_InteractiveContext(mViewer);
 
+   vector<TopoDS_Shape> Objects;
+
    //
-    IPE400 = Make_IPE_Profile(400, 200, 20, 10, gp_Pnt(0, 0, 0), gp_Pnt(0, 0, 6000));
-   Handle(AIS_Shape) AIS_IPE = new AIS_Shape(IPE400);
+   TopoDS_Shape IPE100_a = MyExtrudeProfile(100, 50, 10, 5, gp_Pnt(0, 0, 0), gp_Pnt(0, 0, 7000)); 
+   TopoDS_Shape IPE100_b = MyExtrudeProfile(100, 50, 10, 5, gp_Pnt(0, 0, 7000), gp_Pnt(5000, 0, 8000));
+   TopoDS_Shape IPE100_c = MyExtrudeProfile(100, 50, 10, 5, gp_Pnt(5000, 0, 8000), gp_Pnt(10000, 0, 7000));
+   TopoDS_Shape IPE100_d = MyExtrudeProfile(100, 50, 10, 5, gp_Pnt(10000, 0, 7000), gp_Pnt(10000, 0, 0));
 
-   AIS_IPE->SetMaterial(Graphic3d_NOM_GOLD);
-   AIS_IPE->SetDisplayMode(AIS_Shaded);
-   mContext->Display(AIS_IPE, Standard_False);
-   mContext->SetCurrentObject(AIS_IPE, Standard_False);
-   view_initialized = true;
 
-   PickPoint(mView, IPE400, 199, 99);
+   Objects.push_back(IPE100_a);
+   Objects.push_back(IPE100_b);
+   Objects.push_back(IPE100_c);
+   Objects.push_back(IPE100_d);
+
+
+
+   for (int i = 0; i < Objects.size(); i++)
+   {
+	   Handle(AIS_Shape) AIS = new AIS_Shape(Objects[i]);
+	   AIS->SetMaterial(Graphic3d_NOM_GOLD);
+	   AIS->SetDisplayMode(AIS_Shaded);
+	   mContext->Display(AIS,Standard_False);
+   }
+
+    
+
+
+   //mContext->SetCurrentObject(AIS_IPE1, Standard_True);
+
+   
+
 
    view_initialized = true;
 
@@ -218,6 +239,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEWHEEL:
 	{
 		int ws = HIWORD(wParam);
+		if (ws > 0)
 		mView->Zoom(0, 0, ws, 0);
 	}
 	break;
@@ -228,7 +250,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		
 		
-		gp_Pnt Picked = PickPoint(mView, IPE400, P.x, P.y);
+		gp_Pnt Picked = PickPoint(mView, IPE100, P.x, P.y);
 
 		string S;
 		char xx[30];
@@ -236,7 +258,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		char zz[30];
 		itoa((Picked.X()), xx, 10);
 		itoa((Picked.Y()), yy, 10);
-		itoa((Picked.Z()), zz, 10);
+		itoa((Picked.Z()), zz, 10);   
 
 
 		S = "";
@@ -262,7 +284,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			case ZOOMBUTTON_ID:
 			{
-				mView->Zoom(0,0,10,10);
+				mView->SetProj(V3d_Ypos);
 			}
 			break;
 
@@ -274,7 +296,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
             case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+               // DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+				DialogBox(hInst, MAKEINTRESOURCE(IDD_FORMVIEW), hWnd, About);
+
                 break;
             case IDM_EXIT:
                 DestroyWindow(hWnd);
@@ -304,6 +328,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     return 0;
 }
+
+void V3d_View::Translate(const Handle(Graphic3d_Camera)& theCamera,
+	const Standard_Real theDXv,
+	const Standard_Real theDYv) const
+{
+	const gp_Pnt& aCenter = theCamera->Center();
+	const gp_Dir& aDir = theCamera->Direction();
+	const gp_Dir& anUp = theCamera->Up();
+	gp_Ax3 aCameraCS(aCenter, aDir.Reversed(), aDir ^ anUp);
+	gp_Vec aCameraPanXv = gp_Vec(aCameraCS.XDirection()) * theDXv;
+	gp_Vec aCameraPanYv = gp_Vec(aCameraCS.YDirection()) * theDYv;
+	gp_Vec aCameraPan = aCameraPanXv + aCameraPanYv;
+	gp_Trsf aPanTrsf;
+	aPanTrsf.SetTranslation(aCameraPan);
+	theCamera->Transform(aPanTrsf);
+}
+
+
 
 // Message handler for about box.
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
