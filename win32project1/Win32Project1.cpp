@@ -199,6 +199,15 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    Objects.push_back(IPE100_a);
    IPE100_a = MyExtrudeProfile(200, 100, 10, 10, gp_Pnt(2000, 0, 1000), gp_Pnt(2000, 0, 0));
    Objects.push_back(IPE100_a);
+   //
+   IPE100_a = MyExtrudeProfile(200, 100, 10, 10, gp_Pnt(0, 1000, 0), gp_Pnt(0, 1000, 1000));
+   Objects.push_back(IPE100_a);
+   IPE100_a = MyExtrudeProfile(200, 100, 10, 10, gp_Pnt(0, 1000, 1000), gp_Pnt(1000, 1000, 1500));
+   Objects.push_back(IPE100_a);
+   IPE100_a = MyExtrudeProfile(200, 100, 10, 10, gp_Pnt(1000, 1000, 1500), gp_Pnt(2000, 1000, 1000));
+   Objects.push_back(IPE100_a);
+   IPE100_a = MyExtrudeProfile(200, 100, 10, 10, gp_Pnt(2000, 1000, 1000), gp_Pnt(2000, 1000, 0));
+   Objects.push_back(IPE100_a);
 
 
 
@@ -206,17 +215,14 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    {
 	   AIS = new AIS_Shape(Objects[i]);
 	   AIS->SetMaterial(Graphic3d_NOM_GOLD);
-	//   AIS->SetColor(Quantity_Color(Quantity_NOC_AQUAMARINE1));
+	   AIS->SetColor(Quantity_Color(Quantity_NOC_BEIGE));
 	   AIS->SetDisplayMode(AIS_Shaded);
 	   mContext->Display(AIS,Standard_False);
    }
 
-   AIS_1 = new AIS_Shape(Extrude_profile(100, 100, gp_Pnt(0, 0, 0), gp_Pnt(1000, 1000, 1000)));
-   AIS_1->SetDisplayMode(AIS_Shaded);
-   mContext->Display(AIS_1, Standard_False);
 
 
-   mContext->SetCurrentObject(AIS, Standard_True);
+  // mContext->SetCurrentObject(AIS, Standard_True);
    	   mContext->Display(AIS,Standard_False);
 
    
@@ -258,25 +264,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 		case VK_LEFT:
 		{
-			mView->Pan(-1, 0, 1, true);
+			mView->Pan(-2, 0, true);
 
 		}
 		; break;
 		case VK_RIGHT:
 		{
-			mView->Pan(1, 0, 1, true);
+			mView->Pan(2, 0, true);
 
 		}
 		; break;
 		case VK_UP:
 		{
-			mView->Pan(0, -1, true);
+			mView->Pan(0, 2, true);
 
 		}
 		; break;
 		case VK_DOWN:
 		{
-			mView->Pan(0, 1, 1, true);
+			mView->Pan(0, -2, true);
 
 		}
 		; break;
@@ -325,7 +331,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			case ZOOMBUTTON_ID:
 			{
-				mView->SetProj(V3d_Ypos);
+				mView->SetProj(V3d_Yneg);
 			}
 			break;
 

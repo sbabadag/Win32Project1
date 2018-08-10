@@ -584,6 +584,7 @@ TopoDS_Shape MyExtrudeProfile(double h, double b, double tf, double tw, gp_Pnt s
 	
 	 gp_Trsf T;
 	 T.SetTranslation(gp_Pnt(0, 0, 0), sPt);
+	// T.SetRotation(gp_Ax1(sPt, gp_Dir(ePt.X(), ePt.Y(), ePt.Z())),3.14/4);
 	 BRepBuilderAPI_Transform xform1(myWireProfile, T);
 
 	S.Add(xform1,true,true);
