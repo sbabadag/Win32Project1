@@ -5,12 +5,14 @@
 #include "Win32Project1.h"
 #include "MY_OCC_CLASSES.h"
 
+
 using namespace std;
 
 #define MAX_LOADSTRING 100
 //
 #define ZOOMBUTTON_ID  1001
 #define ZOOMALLBUTTON_ID  1002
+#define DRAWBUTTON_ID 1003
 
 
 
@@ -28,11 +30,21 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 POINT P;
 HWND occ_panel;
 HWND textBox1;
+HWND textBox2;
+HWND textBox3;
+HWND textBox4;
+HWND textBox5;
+HWND textBox6;
+HWND textBox7;
+
 HWND ZoomButton;
 HWND ZoomAllButton;
+HWND DrawButton;
 
-TopoDS_Shape IPE400;
-TopoDS_Shape IPE100;
+
+AIS_Shape *AIS;
+AIS_Shape *AIS_1;
+
 
 
 
@@ -121,10 +133,21 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	DWORD dwExStyle = WS_EX_CLIENTEDGE | WS_EX_DLGMODALFRAME;
 	DWORD dwStyle = WS_CHILD | WS_VISIBLE | SS_CENTER | SS_CENTERIMAGE | SS_SUNKEN;
-	occ_panel = CreateWindowEx(dwExStyle, "STATIC", "Panel 1", dwStyle, 0, 20, 1000, 600, hWndMain, (HMENU)NULL, hInstance, (LPVOID)NULL);
-	textBox1 = CreateWindowEx(NULL, "EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 0, 0, 200, 20, hWndMain, NULL, hInst, NULL);
-	ZoomButton = CreateWindowEx(NULL, "BUTTON", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 210, 0, 30, 30, hWndMain, (HMENU)ZOOMBUTTON_ID, hInst, NULL);
-	ZoomAllButton = CreateWindowEx(NULL, "BUTTON", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 250, 0, 30, 30, hWndMain, (HMENU)ZOOMALLBUTTON_ID, hInst, NULL);
+	occ_panel = CreateWindowEx(dwExStyle, "STATIC", "Panel 1", dwStyle, 50, 50, 1000, 600, hWndMain, (HMENU)NULL, hInstance, (LPVOID)NULL);
+	textBox1 = CreateWindowEx(NULL, "EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 0, 0, 100, 20, hWndMain, NULL, hInst, NULL);
+	textBox2 = CreateWindowEx(NULL, "EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 0, 25, 50, 20, hWndMain, NULL, hInst, NULL);
+	textBox3 = CreateWindowEx(NULL, "EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 0, 50, 50, 20, hWndMain, NULL, hInst, NULL);
+	textBox4 = CreateWindowEx(NULL, "EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 0, 75, 50, 20, hWndMain, NULL, hInst, NULL);
+	//
+	textBox5 = CreateWindowEx(NULL, "EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 0, 100, 50, 20, hWndMain, NULL, hInst, NULL);
+	textBox6 = CreateWindowEx(NULL, "EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 0, 125, 50, 20, hWndMain, NULL, hInst, NULL);
+	textBox7 = CreateWindowEx(NULL, "EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 0, 150, 50, 20, hWndMain, NULL, hInst, NULL);
+
+
+	ZoomButton = CreateWindowEx(NULL, "BUTTON", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 210, 0, 20, 20, hWndMain, (HMENU)ZOOMBUTTON_ID, hInst, NULL);
+	ZoomAllButton = CreateWindowEx(NULL, "BUTTON", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 250, 0, 20, 20, hWndMain, (HMENU)ZOOMALLBUTTON_ID, hInst, NULL);
+	DrawButton = CreateWindowEx(NULL, "BUTTON", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 0, 175, 30, 30, hWndMain, (HMENU)DRAWBUTTON_ID, hInst, NULL);
+
 
 
 
@@ -168,31 +191,33 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    vector<TopoDS_Shape> Objects;
 
    //
-   TopoDS_Shape IPE100_a = MyExtrudeProfile(100, 50, 10, 5, gp_Pnt(0, 0, 0), gp_Pnt(0, 0, 7000)); 
-   TopoDS_Shape IPE100_b = MyExtrudeProfile(100, 50, 10, 5, gp_Pnt(0, 0, 7000), gp_Pnt(5000, 0, 8000));
-   TopoDS_Shape IPE100_c = MyExtrudeProfile(100, 50, 10, 5, gp_Pnt(5000, 0, 8000), gp_Pnt(10000, 0, 7000));
-   TopoDS_Shape IPE100_d = MyExtrudeProfile(100, 50, 10, 5, gp_Pnt(10000, 0, 7000), gp_Pnt(10000, 0, 0));
-
-
+   TopoDS_Shape IPE100_a = MyExtrudeProfile(200, 100, 10, 10, gp_Pnt(0, 0, 0), gp_Pnt(0, 0, 1000));
    Objects.push_back(IPE100_a);
-   Objects.push_back(IPE100_b);
-   Objects.push_back(IPE100_c);
-   Objects.push_back(IPE100_d);
+    IPE100_a = MyExtrudeProfile(200, 100, 10, 10, gp_Pnt(0, 0, 1000), gp_Pnt(1000, 0, 1500));
+   Objects.push_back(IPE100_a);
+    IPE100_a = MyExtrudeProfile(200, 100, 10, 10, gp_Pnt(1000, 0, 1500), gp_Pnt(2000, 0, 1000));
+   Objects.push_back(IPE100_a);
+   IPE100_a = MyExtrudeProfile(200, 100, 10, 10, gp_Pnt(2000, 0, 1000), gp_Pnt(2000, 0, 0));
+   Objects.push_back(IPE100_a);
 
 
 
    for (int i = 0; i < Objects.size(); i++)
    {
-	   Handle(AIS_Shape) AIS = new AIS_Shape(Objects[i]);
+	   AIS = new AIS_Shape(Objects[i]);
 	   AIS->SetMaterial(Graphic3d_NOM_GOLD);
+	//   AIS->SetColor(Quantity_Color(Quantity_NOC_AQUAMARINE1));
 	   AIS->SetDisplayMode(AIS_Shaded);
 	   mContext->Display(AIS,Standard_False);
    }
 
-    
+   AIS_1 = new AIS_Shape(Extrude_profile(100, 100, gp_Pnt(0, 0, 0), gp_Pnt(1000, 1000, 1000)));
+   AIS_1->SetDisplayMode(AIS_Shaded);
+   mContext->Display(AIS_1, Standard_False);
 
 
-   //mContext->SetCurrentObject(AIS_IPE1, Standard_True);
+   mContext->SetCurrentObject(AIS, Standard_True);
+   	   mContext->Display(AIS,Standard_False);
 
    
 
@@ -226,6 +251,41 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 //			return HTCAPTION;
 //		else return HTTRANSPARENT;
 
+
+	case WM_KEYDOWN:
+	{
+		switch (wParam)
+		{
+		case VK_LEFT:
+		{
+			mView->Pan(-1, 0, 1, true);
+
+		}
+		; break;
+		case VK_RIGHT:
+		{
+			mView->Pan(1, 0, 1, true);
+
+		}
+		; break;
+		case VK_UP:
+		{
+			mView->Pan(0, -1, true);
+
+		}
+		; break;
+		case VK_DOWN:
+		{
+			mView->Pan(0, 1, 1, true);
+
+		}
+		; break;
+
+		}
+
+	}
+	break;
+
 	case WM_SIZING:
 	{
 		if (view_initialized)
@@ -241,35 +301,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		int ws = HIWORD(wParam);
 		if (ws > 0)
 		mView->Zoom(0, 0, ws, 0);
+		
 	}
 	break;
 	case WM_MOUSEMOVE: {
 		//
 		P.x = LOWORD(lParam);
 		P.y = HIWORD(lParam);
-
-		
-		
-		gp_Pnt Picked = PickPoint(mView, IPE100, P.x, P.y);
-
-		string S;
-		char xx[30];
-		char yy[30];
-		char zz[30];
-		itoa((Picked.X()), xx, 10);
-		itoa((Picked.Y()), yy, 10);
-		itoa((Picked.Z()), zz, 10);   
-
-
-		S = "";
-		S.append(xx);
-		S.append(" ,");
-		S.append(yy);
-		S.append(" ,");
-		S.append(zz);
-		SetWindowText(textBox1, S.c_str());
-		//
+	
 	}
+	
 		break;
     case WM_COMMAND:
         {
@@ -293,6 +334,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				mView->FitAll();
 			}
 			break;
+
+
+			case DRAWBUTTON_ID:
+			{
+				LPCTSTR S;
+				LPTSTR *A;
+				A = new (LPSTR);
+				GetWindowTextA(textBox2, *A, 100);
+				S = *A;
+				SetWindowText(textBox1, S);
+
+			}
+			break;
+
 
 
             case IDM_ABOUT:
@@ -329,21 +384,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-void V3d_View::Translate(const Handle(Graphic3d_Camera)& theCamera,
-	const Standard_Real theDXv,
-	const Standard_Real theDYv) const
-{
-	const gp_Pnt& aCenter = theCamera->Center();
-	const gp_Dir& aDir = theCamera->Direction();
-	const gp_Dir& anUp = theCamera->Up();
-	gp_Ax3 aCameraCS(aCenter, aDir.Reversed(), aDir ^ anUp);
-	gp_Vec aCameraPanXv = gp_Vec(aCameraCS.XDirection()) * theDXv;
-	gp_Vec aCameraPanYv = gp_Vec(aCameraCS.YDirection()) * theDYv;
-	gp_Vec aCameraPan = aCameraPanXv + aCameraPanYv;
-	gp_Trsf aPanTrsf;
-	aPanTrsf.SetTranslation(aCameraPan);
-	theCamera->Transform(aPanTrsf);
-}
 
 
 
